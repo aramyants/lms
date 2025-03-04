@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\AdminOrTeacherMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,6 +19,19 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::prefix('courses')->group(function () {
+    Route::get('/create', [CourseController::class, 'create'])
+        ->name('courses.create')
+        ->middleware(AdminOrTeacherMiddleware::class);
+
+    Route::get('/', [CourseController::class, 'index'])->name('courses');
+    Route::get('/{course}', [CourseController::class, 'show'])->name('courses.show');
+
+    Route::post('/', [CourseController::class, 'store'])
+        ->name('courses.store')
+        ->middleware(AdminOrTeacherMiddleware::class);
+})->middleware(['auth', 'verified']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
