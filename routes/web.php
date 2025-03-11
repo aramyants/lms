@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LessonController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\AdminOrTeacherMiddleware;
@@ -27,10 +28,13 @@ Route::prefix('courses')->group(function () {
 
     Route::get('/', [CourseController::class, 'index'])->name('courses');
     Route::get('/{course}', [CourseController::class, 'show'])->name('courses.show');
+    Route::get('{course}/lessons/create', [LessonController::class, 'create'])->name('lessons.create');
+    Route::post('{course}/lessons', [LessonController::class, 'store'])->name('lessons.store');
 
     Route::post('/', [CourseController::class, 'store'])
         ->name('courses.store')
         ->middleware(AdminOrTeacherMiddleware::class);
+
 })->middleware(['auth', 'verified']);
 
 Route::middleware('auth')->group(function () {

@@ -57,8 +57,10 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
+        $course->load('lessons');
         return Inertia::render('Courses/Show', [
-            'course' => $course
+            'course' => $course,
+            'canEdit' => Auth::user()?->can('update', $course)
         ]);
     }
 }

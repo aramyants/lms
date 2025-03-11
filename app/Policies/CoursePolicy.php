@@ -37,7 +37,7 @@ class CoursePolicy
      */
     public function update(User $user, Course $course): bool
     {
-        return false;
+        return in_array($user->role, ['teacher', 'admin']);
     }
 
     /**
