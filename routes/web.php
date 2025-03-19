@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfileController;
@@ -17,9 +18,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::prefix('courses')->group(function () {
     Route::get('/create', [CourseController::class, 'create'])
@@ -38,6 +37,7 @@ Route::prefix('courses')->group(function () {
 })->middleware(['auth', 'verified']);
 
 Route::middleware('auth')->group(function () {
+    Route::post('/join-room', [CourseController::class, 'join']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

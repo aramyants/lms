@@ -13,7 +13,8 @@ class Course extends Model
         'title',
         'description',
         'user_id',
-        'video'
+        'video',
+        'code',
     ];
 
     // Relationship to the user who created the course
@@ -25,5 +26,11 @@ class Course extends Model
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
+    }
+
+    public function assignedUsers()
+    {
+        return $this->belongsToMany(User::class, 'assigned_course_user')
+            ->withTimestamps();
     }
 }

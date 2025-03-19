@@ -42,11 +42,15 @@ class CourseController extends Controller
         if ($request->hasFile('video')) {
             $videoPath = $request->file('video')->store('videos', 'public'); // Save video in 'public/videos'
         }
+        do {
+            $code = str_pad(mt_rand(0, 999999999), 9, '0', STR_PAD_LEFT);
+        } while (Course::where('code', $code)->exists());
         // Store the course along with the video path
         $courseData = [
             'title' => $validated['title'],
             'description' => $validated['description'],
             'video' => $videoPath, // Save the video path in the database
+            'code' => $code,
         ];
 
         // Create the course and associate it with the authenticated user
@@ -62,6 +66,24 @@ class CourseController extends Controller
             'course' => $course,
             'canEdit' => Auth::user()?->can('update', $course)
         ]);
+    }
+
+    public function join(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|digits:9',
+        ]);
+
+        // Find the course by code
+        $course = Course::where('code', $request->code)->firstOrFail();
+
+        // Get the currently authenticated user
+        $user = auth()->user();
+
+        // Assign the course (without duplicating)
+        $user->assignedCourses()->syncWithoutDetaching($course->id);
+
+        return redirect()->route('dashboard')->with('success', 'Successfully joined the room.');
     }
 }
 
