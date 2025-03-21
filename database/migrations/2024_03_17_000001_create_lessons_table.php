@@ -8,20 +8,18 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('course_user', function (Blueprint $table) {
+        Schema::create('lessons', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('content')->nullable();
+            $table->string('video')->nullable();
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->timestamp('enrolled_at')->useCurrent();
             $table->timestamps();
-
-            // Prevent duplicate enrollments
-            $table->unique(['course_id', 'user_id']);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('course_user');
+        Schema::dropIfExists('lessons');
     }
 };

@@ -35,9 +35,9 @@ class CoursePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Course $course): bool
+    public function update(User $user, Course $course)
     {
-        return in_array($user->role, ['teacher', 'admin']);
+        return $user->id === $course->user_id || $user->role === 'admin';
     }
 
     /**
@@ -62,5 +62,10 @@ class CoursePolicy
     public function forceDelete(User $user, Course $course): bool
     {
         return false;
+    }
+
+    public function viewStudents(User $user, Course $course)
+    {
+        return $user->id === $course->user_id || $user->role === 'admin';
     }
 }

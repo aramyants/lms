@@ -8,6 +8,7 @@ use App\Http\Middleware\AdminOrTeacherMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -18,7 +19,21 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard', [
+            'courses' => Auth::user()->courses()->latest()->get()
+        ]);
+    })->name('dashboard');
+
+    Route::resource('courses', CourseController::class);
+    Route::post('/join-room', [CourseController::class, 'join'])->name('courses.join');
+    Route::get('/courses/{course}/students', [CourseController::class, 'students'])->name('courses.students');
+
+    // Course student management routes
+    Route::post('/courses/{course}/invite', [CourseController::class, 'invite'])->name('courses.invite');
+    Route::delete('/courses/{course}/students/{student}', [CourseController::class, 'removeStudent'])->name('courses.remove-student');
+});
 
 Route::prefix('courses')->group(function () {
     Route::get('/create', [CourseController::class, 'create'])
@@ -37,7 +52,6 @@ Route::prefix('courses')->group(function () {
 })->middleware(['auth', 'verified']);
 
 Route::middleware('auth')->group(function () {
-    Route::post('/join-room', [CourseController::class, 'join']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

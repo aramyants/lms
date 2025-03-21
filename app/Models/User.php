@@ -38,22 +38,25 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
     public function courses()
     {
-        return $this->hasMany(Course::class);
+        return $this->belongsToMany(Course::class, 'course_user')
+            ->withTimestamps();
     }
 
-    public function assignedCourses()
+    public function enrolledCourses()
     {
         return $this->belongsToMany(Course::class, 'course_user')
             ->withTimestamps();
+    }
+
+    public function teachingCourses()
+    {
+        return $this->hasMany(Course::class);
     }
 }
