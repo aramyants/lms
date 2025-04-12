@@ -17,7 +17,7 @@ class LessonController extends Controller
     public function create(Course $course)
     {
         // Check if user can create lessons for this course
-        if (Auth::id() !== $course->user_id) {
+        if (!Gate::allows('manageLessons', $course)) {
             abort(403);
         }
 
@@ -29,7 +29,7 @@ class LessonController extends Controller
     public function store(Request $request, Course $course)
     {
         // Check if user can create lessons for this course
-        if (Auth::id() !== $course->user_id) {
+        if (!Gate::allows('manageLessons', $course)) {
             abort(403);
         }
 

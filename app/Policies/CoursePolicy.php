@@ -68,4 +68,9 @@ class CoursePolicy
     {
         return $user->id === $course->user_id || $user->role === 'admin';
     }
+
+    public function manageLessons(User $user, Course $course)
+    {
+        return $user->id === $course->user_id;
+    }
 }

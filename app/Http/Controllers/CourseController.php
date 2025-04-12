@@ -131,7 +131,7 @@ class CourseController extends Controller
 
     public function students(Course $course)
     {
-        if (Auth::user()->id !== $course->user_id) {
+        if (!Gate::allows('viewStudents', $course)) {
             abort(403);
         }
 
@@ -149,7 +149,7 @@ class CourseController extends Controller
     public function invite(Request $request, Course $course)
     {
         // Check if user can invite students to this course
-        if (Auth::user()->id !== $course->user_id) {
+        if (!Gate::allows('viewStudents', $course)) {
             abort(403);
         }
 
@@ -173,7 +173,7 @@ class CourseController extends Controller
     public function removeStudent(Course $course, User $student)
     {
         // Check if user can remove students from this course
-        if (auth()->id() !== $course->user_id) {
+        if (!Gate::allows('viewStudents', $course)) {
             abort(403);
         }
 
