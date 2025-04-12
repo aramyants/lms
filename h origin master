@@ -1,0 +1,10 @@
+[33mcommit 6861c17137c25d6c10cbc9dcb5264629e0a9f669[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: kamalyanaram <armcrytube@gmail.com>
+Date:   Sat Apr 12 22:51:25 2025 +0400
+
+    Update course and lesson controllers
+
+M	app/Http/Controllers/CourseController.php
+M	app/Http/Controllers/LessonController.php
+M	app/Policies/CoursePolicy.php
+M	resources/js/Pages/Courses/Show.jsx
