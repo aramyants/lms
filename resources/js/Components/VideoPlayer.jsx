@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReactPlayer from "react-player";
 
-const VideoPlayer = ({ src, thumbnail }) => {
+const VideoPlayer = ({ src, thumbnail, onEnded, onTimeUpdate }) => {
     const [hasStarted, setHasStarted] = useState(false);
 
     return (
@@ -201,6 +201,10 @@ const VideoPlayer = ({ src, thumbnail }) => {
                         playing={hasStarted}
                         controls={true}
                         playsinline
+                        onEnded={onEnded}
+                        onProgress={({ playedSeconds }) => {
+                            if (onTimeUpdate) onTimeUpdate(playedSeconds);
+                        }}
                         config={{
                             file: {
                                 attributes: {

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LessonCompletionController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfileController;
@@ -51,10 +53,18 @@ Route::prefix('courses')->group(function () {
 
 })->middleware(['auth', 'verified']);
 
+Route::post('/lessons/{lesson}/complete', [LessonCompletionController::class, 'store'])
+    ->middleware(['auth', 'verified']);
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+Route::post('/courses/{course}/messages', [CourseController::class, 'storeMessage'])->name('courses.storeMessage');
 
 require __DIR__.'/auth.php';

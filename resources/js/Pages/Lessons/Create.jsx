@@ -1,4 +1,3 @@
-// resources/js/Pages/Lessons/Create.jsx
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm } from "@inertiajs/react";
 

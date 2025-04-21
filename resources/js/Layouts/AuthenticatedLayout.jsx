@@ -43,6 +43,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Courses
                                 </NavLink>
+                                <NavLink
+                                    href={route("chat.index")}
+                                    active={route().current("chat.index")}
+                                    className="text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+                                >
+                                    Chat Assistant
+                                </NavLink>
                             </div>
                         </div>
 

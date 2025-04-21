@@ -86,7 +86,11 @@ class CourseController extends Controller
         $isEnrolled = $user->courses()->where('course_id', $course->id)->exists();
 
         // Load the course with its relationships
-        $course->load(['lessons', 'teacher']);
+        $course->load(['lessons' => function($query) {
+            $query->withExists(['usersCompleted as is_completed' => function($q) {
+                $q->where('user_id', auth()->id());
+            }]);
+        }, 'teacher']);
 
         // Transform the course data to include instructor name and video path
         $courseData = array_merge($course->toArray(), [
@@ -103,7 +107,8 @@ class CourseController extends Controller
                     'id' => $lesson->id,
                     'title' => $lesson->title,
                     'description' => $lesson->content,
-                    'video_path' => $lesson->video
+                    'video_path' => $lesson->video,
+                    'is_completed' => $lesson->is_completed,
                 ];
             })
         ]);

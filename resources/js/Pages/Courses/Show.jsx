@@ -1,193 +1,9 @@
-// resources/js/Pages/Courses/Show.jsx
 import VideoPlayer from "@/Components/VideoPlayer";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
 import "@videojs/themes/dist/forest/index.css";
 import { useEffect, useRef, useState } from "react";
-import videojs from "video.js";
 import "video.js/dist/video-js.css";
-
-// Remove HLS plugins since we're not using them
-// import "videojs-contrib-quality-levels";
-// import "videojs-hls-quality-selector";
-
-// Custom Video.js component
-const VideoPlayerComponent = ({ options, onReady }) => {
-    const videoRef = useRef(null);
-    const playerRef = useRef(null);
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        // Make sure Video.js player is only initialized once
-        if (!playerRef.current) {
-            const videoElement = videoRef.current;
-            if (!videoElement) return;
-
-            // Create and initialize the player
-            const player = videojs(
-                videoElement,
-                {
-                    ...options,
-                    controls: true,
-                    fluid: true,
-                    preload: "auto",
-                    html5: {
-                        nativeAudioTracks: false,
-                        nativeVideoTracks: false,
-                    },
-                    controlBar: {
-                        children: [
-                            "playToggle",
-                            "volumePanel",
-                            "currentTimeDisplay",
-                            "timeDivider",
-                            "durationDisplay",
-                            "progressControl",
-                            "remainingTimeDisplay",
-                            "playbackRateMenuButton",
-                            "fullscreenToggle",
-                        ],
-                    },
-                    playbackRates: [0.5, 1, 1.5, 2],
-                },
-                () => {
-                    playerRef.current = player;
-                    setIsLoading(false);
-                    onReady && onReady(player);
-                }
-            );
-
-            // Add error handling with more detailed messages
-            player.on("error", () => {
-                const error = player.error();
-                let errorMessage =
-                    "Error loading video. Please try again later.";
-
-                if (error) {
-                    switch (error.code) {
-                        case 1:
-                            errorMessage =
-                                "The video file was not found. Please check the URL.";
-                            break;
-                        case 2:
-                            errorMessage = "The video playback was aborted.";
-                            break;
-                        case 3:
-                            errorMessage =
-                                "The video is not in a supported format.";
-                            break;
-                        case 4:
-                            errorMessage = "The video file is not accessible.";
-                            break;
-                        case 5:
-                            errorMessage =
-                                "There was an error decoding the video.";
-                            break;
-                    }
-                }
-
-                setError(errorMessage);
-                setIsLoading(false);
-                console.error("Video.js Error:", error);
-            });
-
-            // Add loading handling
-            player.on("loadstart", () => {
-                setIsLoading(true);
-                setError(null);
-            });
-
-            player.on("loadeddata", () => {
-                setIsLoading(false);
-            });
-
-            // Add keyboard shortcuts
-            player.on("keydown", (e) => {
-                switch (e.key) {
-                    case " ":
-                    case "k":
-                        if (player.paused()) player.play();
-                        else player.pause();
-                        e.preventDefault();
-                        break;
-                    case "ArrowRight":
-                        player.currentTime(player.currentTime() + 10);
-                        e.preventDefault();
-                        break;
-                    case "ArrowLeft":
-                        player.currentTime(player.currentTime() - 10);
-                        e.preventDefault();
-                        break;
-                    case "f":
-                        if (player.isFullscreen()) player.exitFullscreen();
-                        else player.requestFullscreen();
-                        e.preventDefault();
-                        break;
-                    case "m":
-                        player.muted(!player.muted());
-                        e.preventDefault();
-                        break;
-                }
-            });
-        }
-
-        // Cleanup function
-        return () => {
-            const player = playerRef.current;
-            if (player && !player.isDisposed()) {
-                player.dispose();
-                playerRef.current = null;
-            }
-        };
-    }, [options, videoRef]);
-
-    return (
-        <div className="relative">
-            <div data-vjs-player>
-                <video
-                    ref={videoRef}
-                    className="video-js vjs-theme-forest vjs-big-play-centered"
-                >
-                    {options.sources &&
-                        options.sources.map((source, index) => (
-                            <source key={index} {...source} />
-                        ))}
-                    <p className="vjs-no-js">
-                        To view this video please enable JavaScript, and
-                        consider upgrading to a web browser that supports HTML5
-                        video
-                    </p>
-                </video>
-            </div>
-            {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-                </div>
-            )}
-            {error && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="text-white text-center p-4">
-                        <svg
-                            className="mx-auto h-12 w-12 text-red-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                        </svg>
-                        <p className="mt-2">{error}</p>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
 
 const styles = `
     .course-container {
@@ -485,6 +301,15 @@ const styles = `
             position: static;
         }
     }
+
+    .lesson-icon.completed {
+        background: #dcfce7;
+        color: #22c55e;
+    }
+
+    .completed-check {
+        stroke: #22c55e;
+    }
 `;
 
 export default function Show({ auth, course, lessons = [] }) {
@@ -517,6 +342,21 @@ export default function Show({ auth, course, lessons = [] }) {
     const currentPoster = currentLesson?.thumbnail_path
         ? getVideoUrl(currentLesson.thumbnail_path)
         : null;
+    console.log(lessonsList);
+    const [completedLessonIds, setCompletedLessonIds] = useState(
+        lessonsList.filter(lesson => lesson.is_completed).map(lesson => lesson.id)
+    );
+
+    const handleVideoEnd = () => {
+        if (currentLesson && !completedLessonIds.includes(currentLesson.id)) {
+            axios.post(`/lessons/${currentLesson.id}/complete`)
+                .then(() => {
+                    setCompletedLessonIds([...completedLessonIds, currentLesson.id]);
+                })
+                .catch(console.error);
+        }
+    };
+
 
     // Add error state for missing course data
     if (!course) {
@@ -549,9 +389,7 @@ export default function Show({ auth, course, lessons = [] }) {
                             <VideoPlayer
                                 src={currentVideo}
                                 poster={currentPoster}
-                                onTimeUpdate={(time) => {
-                                    console.log("Video time:", time);
-                                }}
+                                onEnded={handleVideoEnd}
                             />
                         )}
                     </div>
@@ -698,25 +536,16 @@ export default function Show({ auth, course, lessons = [] }) {
                                         }`}
                                     >
                                         <div className="lesson-icon">
-                                            <svg
-                                                className="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                                                />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                />
-                                            </svg>
+                                            {completedLessonIds.includes(lesson.id) ? (
+                                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            )}
                                         </div>
                                         <div className="lesson-content">
                                             <h3 className="lesson-title">

@@ -20,4 +20,11 @@ class Lesson extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function usersCompleted()
+    {
+        return $this->belongsToMany(User::class, 'lesson_user')
+            ->withPivot('completed_at')
+            ->withTimestamps();
+    }
 }
