@@ -310,6 +310,39 @@ const styles = `
     .completed-check {
         stroke: #22c55e;
     }
+
+
+    .essay-section {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f3f4f6;
+        text-align: center;
+    }
+
+    .essay-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        background: #22c55e;
+        color: white;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .essay-button:hover {
+        background: #16a34a;
+        transform: translateY(-1px);
+        color: white;
+    }
+
+    .essay-button svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
 `;
 
 export default function Show({ auth, course, lessons = [] }) {
@@ -357,6 +390,8 @@ export default function Show({ auth, course, lessons = [] }) {
         }
     };
 
+    const allLessonsCompleted = lessonsList.length > 0 &&
+        completedLessonIds.length === lessonsList.length;
 
     // Add error state for missing course data
     if (!course) {
@@ -464,6 +499,29 @@ export default function Show({ auth, course, lessons = [] }) {
                                     </svg>
                                     <span>Course Code: {course.code}</span>
                                 </div>
+                                {!currentLesson && allLessonsCompleted && (
+                                    <div className="essay-section">
+                                        <Link
+                                            href={`/courses/${course.id}/essay`}
+                                            className="essay-button"
+                                        >
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
+                                            Take Final Essay
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

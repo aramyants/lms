@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\User;
+use App\Services\ClaudeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,12 @@ use Inertia\Inertia;
 
 class CourseController extends Controller
 {
+    protected $claude;
+
+    public function __construct(ClaudeService $claude)
+    {
+        $this->claude = $claude;
+    }
     public function index()
     {
         $user = Auth::user();
@@ -185,6 +192,95 @@ class CourseController extends Controller
         $course->students()->detach($student->id);
 
         return back()->with('success', 'Student has been removed from the course.');
+    }
+
+    public function essay(Course $course)
+    {
+        // Check if all lessons are completed
+        $completedLessons = auth()->user()->completedLessons()->where('course_id', $course->id)->count();
+        $totalLessons = $course->lessons()->count();
+
+        if ($totalLessons === 0 || $completedLessons < $totalLessons) {
+            return redirect()->route('courses.show', $course)
+                ->with('error', 'Complete all lessons to access the final essay');
+        }
+
+        return Inertia::render('Courses/Essay', [
+            'course' => $course->load('essaySubmission'),
+            'characterLimit' => 2000,
+            'existingEssay' => $course->essaySubmission ?? null
+        ]);
+    }
+
+    public function storeEssay(Course $course, Request $request)
+    {
+        // Check for existing submission
+        if ($course->essaySubmission && $course->essaySubmission->score !== null) {
+            return back()->with('error', 'Essay already submitted and graded');
+        }
+
+        $request->validate([
+            'content' => [
+                'required',
+                'string',
+                'min:500',
+                'max:2000'
+            ]
+        ]);
+
+        // Check if user completed all lessons
+        $completedLessons = auth()->user()->completedLessons()->count();
+        if ($completedLessons < $course->lessons()->count()) {
+            return back()->with('error', 'Complete all lessons before submitting');
+        }
+
+        // Get AI evaluation
+        $systemPrompt = <<<PROMPT
+Evaluate this essay for the course "{$course->title}" with the following description:
+"{$course->description}"
+
+Score the essay (0-100) based on:
+1. Relevance to course content (30%)
+2. Logical structure and coherence (25%)
+3. Depth of understanding demonstrated (25%)
+4. Language quality and clarity (20%)
+
+Consider these course-specific factors:
+- Alignment with course objectives
+- Use of course-specific terminology
+- Application of course concepts
+- Critical thinking demonstrated
+
+Provide ONLY the numeric score without any explanation or formatting.
+PROMPT;
+        try {
+            $response = $this->claude->chat($systemPrompt, $request->content);
+            $scoreText = $response['content'][0]['text']; // Access the first text element
+
+            $score = (int) filter_var($scoreText, FILTER_SANITIZE_NUMBER_INT);
+
+            $score = max(0, min(100, $score));
+
+            if ($score < 0 || $score > 100) {
+                throw new \Exception('Invalid score received from AI');
+            }
+        } catch (\Exception $e) {
+            \Log::error('AI Evaluation failed: ' . $e->getMessage());
+            return back()->with('error', 'Essay evaluation failed. Please try again.');
+        }
+
+        // Save submission
+        $submission = $course->essaySubmission()->updateOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'content' => $request->getContent(),
+                'score' => $score,
+                'submitted_at' => now()
+            ]
+        );
+
+        return redirect()->route('courses.essay', $course)
+            ->with('success', 'Essay submitted and graded successfully!');
     }
 }
 

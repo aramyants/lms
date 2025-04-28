@@ -73,4 +73,9 @@ class User extends Authenticatable
             ->withPivot('completed_at')
             ->withTimestamps();
     }
+
+    public function essaySubmissions()
+    {
+        return $this->hasMany(EssaySubmission::class);
+    }
 }

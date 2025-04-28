@@ -67,4 +67,8 @@ Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
 Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
 Route::post('/courses/{course}/messages', [CourseController::class, 'storeMessage'])->name('courses.storeMessage');
 
+Route::get('/courses/{course}/essay', [CourseController::class, 'essay'])
+    ->name('courses.essay');
+Route::post('/courses/{course}/essay', [CourseController::class, 'storeEssay'])
+    ->name('courses.essay.store');
 require __DIR__.'/auth.php';

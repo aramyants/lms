@@ -38,4 +38,11 @@ class Course extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function essaySubmission()
+    {
+        return $this->hasOne(EssaySubmission::class)
+            ->where('user_id', auth()->id())
+            ->select(['id', 'content', 'score', 'submitted_at', 'course_id', 'user_id']);
+    }
 }
